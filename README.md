@@ -1,4 +1,4 @@
-# Kalshi New Market Alerts
+# New Market Scanner
 
 Get a Telegram notification the moment a new market is listed on Kalshi.
 
