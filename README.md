@@ -8,7 +8,10 @@ New markets are where odds are most likely to be miscalibrated, and sometimes th
 
 - Polls Kalshi's free public market data API (no Kalshi account or API key needed).
 - Sends **one alert per event** (not per market), with the title, Yes bid/ask and a link.
-- When you first message the bot, it asks **which categories you're most interested in**. You only get alerts for those.
+- When you first message the bot, it asks you three things so you don't get flooded:
+  1. **Categories** you care about.
+  2. **How often** you want alerts: instant, or a digest every 5 min / 15 min / hourly.
+  3. **Quality thresholds**: minimum Yes bid, maximum bid/ask spread, and minimum contracts at the best bid (a simple liquidity check).
 - Multiple people can use the same bot. Everyone has their own settings.
 
 ## Bot commands
@@ -16,10 +19,26 @@ New markets are where odds are most likely to be miscalibrated, and sometimes th
 | Command | What it does |
 |---|---|
 | `/topics` | Pick which categories you want (tap to toggle) |
+| `/frequency` | Instant alerts, or a 5 min / 15 min / hourly digest |
+| `/filters` | Set min Yes bid, max spread and min size at the bid |
 | `/all` / `/none` | Turn every category on / off |
 | `/pause` / `/resume` | Stop / restart alerts without losing your settings |
-| `/status` | See what you're subscribed to |
+| `/status` | See all your current settings |
 | `/help` | Show the help page (typing `help` works too) |
+
+### How the thresholds work
+
+New markets often have no quotes at all, so these filters are what keep junk out:
+
+- **Min Yes bid**: skip markets where the best Yes bid is below this (e.g. `5¢+`). `Any` includes unquoted markets.
+- **Max spread**: skip markets where ask minus bid is wider than this. Markets with no bid or ask are skipped when this is set.
+- **Min size at bid**: skip markets with fewer contracts than this resting at the best bid.
+
+A market only alerts you if it passes all three. If an event has several markets, you get the first one that passes plus a "+N more" count.
+
+### How "instant" works
+
+The scanner checks Kalshi every `POLL_SECONDS` (default 60), so instant means within about a minute of a market being listed. Lower it (e.g. `POLL_SECONDS=10`) for faster alerts; Kalshi's public API is rate limited, so don't go much below that.
 
 Categories: Politics, Elections, Economics, Financials, Sports, Entertainment, Science and Technology, Climate and Weather, Health, World, Companies, Social.
 
@@ -54,12 +73,15 @@ Leave this terminal open. The scanner only sends alerts while it's running.
 ### 4. Subscribe
 
 1. In Telegram, open your bot (`t.me/<your_bot_username>`) and press **Start**.
-2. Tap the categories you want. Send `/help` any time.
+2. Answer the quick setup questions (categories, frequency, thresholds). Change them any time with `/topics`, `/frequency`, `/filters`, or see `/help`.
 3. Wait for new markets. The first scan only records existing markets as a baseline, so alerts begin with markets listed after that. A busy hour can have a few hundred new events, so pick categories to keep things quiet.
 
 ### 5. Share it (optional)
 
-Anyone who opens your bot and presses **Start** gets their own subscription. Just share `t.me/<your_bot_username>`. The script must be running somewhere that stays on (a VPS, Raspberry Pi, Fly.io, Railway, Render, or a spare machine).
+Two ways to hand this to other people:
+
+- **Share your bot:** anyone who opens `t.me/<your_bot_username>` and presses **Start** gets their own settings. Your script has to stay running somewhere that's always on (a VPS, Raspberry Pi, Fly.io, Railway, Render, or a spare machine).
+- **Share the repo:** others clone this repo, make their own bot with BotFather (steps 1-3), and run it themselves. Each person needs their own token and their own machine running it.
 
 ## Configuration
 
